@@ -19,25 +19,29 @@ class Developer(object):
         if self.current_task != None and self.current_task.status == "in progress":
             self.current_task.status == "todo"
         self.current_task = task
-        self.current_task.status == "in progress"
+        self.current_task.status = "in progress"
 
     def work(self):
         if (self.current_task == None or self.current_task.status == "done") and len(self.tasks) > 0:
             tasks = [task for task in self.tasks if not task.is_blocked and not task.status == "done"]
             tasks.sort(key=lambda x: x.priority)
-            self.start_task(tasks[0])
+            if len(tasks) > 0:
+                self.start_task(tasks[0])
+            else:
+                print("done!")
         if self.current_task != None and self.current_task.status == "in progress":
-            print("should work")
             self.progress_task()
 
     def progress_task(self):
-        print(current_task)
+        print("\n")
+        print(self.current_task)
         print("---")
         multiplier = 1
         if random.randrange(0, 10) > self.luck:
             multiplier *= -1
-        self.current_task.change_progress(self.productivity * multiplier)
-        print(current_task)
+        cur_prod = random.randrange(self.productivity[0], self.productivity[1])
+        self.current_task.change_progress(cur_prod * multiplier)
+        print(self.current_task)
 
 class Requirement(object):
     def __init__(self, tasks):
@@ -169,5 +173,8 @@ dave = Developer("dave", (0, 6), 10, 7)
 for task in ft.tasks:
     dave.take_task(task)
 
-for i in range(10):
+for i in range(100):
     dave.work()
+
+for task in ft.tasks:
+    print(task)
