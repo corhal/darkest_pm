@@ -15,24 +15,29 @@ class Developer(object):
     def take_task(self, task):
         self.tasks.append(task)
 
-    def start_task(task):
+    def start_task(self, task):
         if self.current_task != None and self.current_task.status == "in progress":
             self.current_task.status == "todo"
-            self.current_task = task
-            self.current_task.status == "in progress"
+        self.current_task = task
+        self.current_task.status == "in progress"
 
     def work(self):
-        if (self.current_task == None or self.current_task.status == "done") and len(self.tasks > 0):
-            self.tasks.sort(key=lambda x: x.priority)
-            self.start_task(self.tasks[0])
+        if (self.current_task == None or self.current_task.status == "done") and len(self.tasks) > 0:
+            tasks = [task for task in self.tasks if not task.is_blocked and not task.status == "done"]
+            tasks.sort(key=lambda x: x.priority)
+            self.start_task(tasks[0])
         if self.current_task != None and self.current_task.status == "in progress":
+            print("should work")
             self.progress_task()
 
     def progress_task(self):
+        print(current_task)
+        print("---")
         multiplier = 1
         if random.randrange(0, 10) > self.luck:
             multiplier *= -1
-        self.current_task.change_progress += self.productivity * multiplier
+        self.current_task.change_progress(self.productivity * multiplier)
+        print(current_task)
 
 class Requirement(object):
     def __init__(self, tasks):
@@ -65,7 +70,7 @@ class Task(object):
         return not self.requirement.check()
 
     def change_progress(self, amount):
-        self.progress += amount
+        self.progress = max(min(self.progress + amount, self.max_progress), 0)
         if self.progress >= self.max_progress:
             self.status = "done"
 
@@ -75,7 +80,7 @@ class Task(object):
         if self.requirement != None and len(self.requirement.tasks) > 0:
             mystr += ", blocked by: ["
             for task in self.requirement.tasks:
-                mystr += task.name
+                mystr += " " + task.name
             mystr += "]"
         return mystr
 
@@ -88,7 +93,6 @@ class Feature(Task):
     def generate_tasks(self, task_max_progress, max_length):
         task_max_progresses = []
         progress_left = self.max_progress
-        # task_max_progress = random.randint(progress_left // 8, progress_left // 5)
         task_max_progresses.append(task_max_progress)
         progress_left -= task_max_progress
         while progress_left > 0:
@@ -99,7 +103,6 @@ class Feature(Task):
         lines = []
         starting_positions = []
         tasks_count = len(task_max_progresses)
-        # max_length = random.randint(tasks_count // 3, tasks_count // 2)
         tasks_count -= max_length
         line = [0] * max_length
         lines.append(line)
@@ -111,7 +114,6 @@ class Feature(Task):
             lines.append(line)
             tasks_count -= length
             try:
-                print(max_length - length)
                 starting_position = random.randrange(0, max_length - length)
             except ValueError:
                 starting_position = 0
@@ -125,7 +127,6 @@ class Feature(Task):
                 if i > 0:
                     requirement.add([line[i-1]])
                 line[i] = Task("Task " + str(count), 1, task_progress, requirement)
-                print(line[i])
                 count += 1
         real_positions = []
         for i in range(len(lines)):
@@ -133,11 +134,6 @@ class Feature(Task):
             start_pos = starting_positions[i]
             for j in range(len(lines[i])):
                 real_positions[i].append(start_pos + j)
-
-        print("Max progress: " + str(self.max_progress))
-        print(lines)
-        print(starting_positions)
-        print(real_positions)
 
         for i in range(len(lines)):
             for j in range(len(lines[i])):
@@ -149,6 +145,7 @@ class Feature(Task):
                     for chance in sorted(additional_tasks_by_chances.keys()):
                         if dice_roll <= chance:
                             additional_tasks = additional_tasks_by_chances[chance]
+                            break
                     for d in range(additional_tasks):
                         line_indices = []
                         for k in range(len(starting_positions)):
@@ -165,6 +162,12 @@ class Feature(Task):
 
         for line in lines:
             for task in line:
-                print(task)
+                self.tasks.append(task)
 
-ft = Feature("f1", 1, 63, 15, 5)
+ft = Feature("f1", 1, 63, 10, 4)
+dave = Developer("dave", (0, 6), 10, 7)
+for task in ft.tasks:
+    dave.take_task(task)
+
+for i in range(10):
+    dave.work()
