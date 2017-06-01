@@ -173,8 +173,12 @@ dave = Developer("dave", (0, 6), 10, 7)
 for task in ft.tasks:
     dave.take_task(task)
 
-for i in range(100):
-    dave.work()
+class Game(object):
+    def __init__(self):
+        self.weekdays = [i for i in range(1, 6)]
+        self.weekend = [i for i in range(6, 8)]
+        self.workhours = [i for i in range(10, 20)]
+        self.freehours = [i for i in range(0, 24) if i not in self.workhours]
 
-for task in ft.tasks:
-    print(task)
+game = Game()
+print(game.freehours)
